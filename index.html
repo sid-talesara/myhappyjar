@@ -495,6 +495,41 @@
     .hero-sub strong { color: var(--text); }
     .hero-sub-meta { color: var(--muted); font-size: 0.78rem; }
 
+    /* ── SHARE ── */
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .share-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 15px 28px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+      font-family: inherit;
+    }
+    .share-btn:hover {
+      background: var(--peach);
+      border-color: var(--peach);
+      transform: translateY(-2px);
+    }
+    .share-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      min-height: 1rem;
+      transition: opacity 0.3s;
+    }
+
     /* Tally button reset */
     [data-tally-open] { font-family: inherit; }
   </style>
@@ -643,13 +678,20 @@
   <section class="footer-cta">
     <h2>Start filling your jar.</h2>
     <p>Join the waitlist — be the first to know when it's ready.</p>
-    <button class="hero-cta"
-      data-tally-open="ODJ8W8"
-      data-tally-layout="modal"
-      data-tally-emoji-text="👋"
-      data-tally-emoji-animation="wave">
-      Join the Waitlist
-    </button>
+    <div class="footer-actions">
+      <button class="hero-cta"
+        data-tally-open="ODJ8W8"
+        data-tally-layout="modal"
+        data-tally-emoji-text="👋"
+        data-tally-emoji-animation="wave">
+        Join the Waitlist
+      </button>
+      <button class="share-btn" id="shareBtn" onclick="handleShare()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share with a friend
+      </button>
+    </div>
+    <p class="share-hint" id="shareHint"></p>
   </section>
 
   <!-- FOOTER -->
@@ -658,5 +700,26 @@
     <p>Made with warmth. © 2026</p>
   </footer>
 
+  <script>
+    async function handleShare() {
+      const hint = document.getElementById('shareHint');
+      const url = window.location.href;
+      const text = 'Check out My Happy Jar — a tiny app to collect your happy moments every day 🫙';
+
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: 'My Happy Jar', text, url });
+        } catch(e) {}
+      } else {
+        try {
+          await navigator.clipboard.writeText(url);
+          hint.textContent = '✓ Link copied to clipboard!';
+          setTimeout(() => hint.textContent = '', 3000);
+        } catch(e) {
+          hint.textContent = window.location.href;
+        }
+      }
+    }
+  </script>
 </body>
 </html>
