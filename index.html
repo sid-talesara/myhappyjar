@@ -471,17 +471,24 @@
     /* ── SOCIAL PROOF ── */
     .hero-social {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 12px;
       margin-top: -4px;
     }
-    .stars {
-      color: #F5A623;
-      font-size: 1rem;
-      letter-spacing: 2px;
+    .avatars {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
     }
-    .hero-sub { font-size: 0.82rem; color: var(--muted); white-space: nowrap; }
+    .av {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--warm-bg);
+      margin-left: -10px;
+      object-fit: cover;
+    }
+    .avatars .av:first-child { margin-left: 0; }
+    .hero-sub { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
     .hero-sub strong { color: var(--text); }
 
     /* Tally button reset */
@@ -515,8 +522,13 @@
       Join the Waitlist
     </button>
     <div class="hero-social">
-      <div class="stars">★★★★★</div>
-      <p class="hero-sub"><strong>583 people</strong> already waiting &nbsp;·&nbsp; Free &nbsp;·&nbsp; No spam</p>
+      <div class="avatars">
+        <img class="av" src="https://i.pravatar.cc/40?img=47" alt="user" />
+        <img class="av" src="https://i.pravatar.cc/40?img=12" alt="user" />
+        <img class="av" src="https://i.pravatar.cc/40?img=32" alt="user" />
+        <img class="av" src="https://i.pravatar.cc/40?img=9"  alt="user" />
+      </div>
+      <p class="hero-sub"><strong>583 people</strong> already on the waitlist &nbsp;·&nbsp; Free &nbsp;·&nbsp; No spam</p>
     </div>
   </section>
 
