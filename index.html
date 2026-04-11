@@ -121,18 +121,13 @@
       letter-spacing: 0.01em;
     }
     .hero-cta:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(61,44,30,0.2); }
-    .hero-sub {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-top: -4px;
-    }
 
     /* ── JAR SCENE ── */
     .jar-scene {
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      padding: 20px 24px 0;
+      padding: 130px 24px 0;
       position: relative;
     }
 
@@ -430,7 +425,7 @@
       .hero-cta { padding: 14px 28px; font-size: 0.95rem; width: 100%; max-width: 320px; }
 
       /* Jar scene */
-      .jar-scene { padding: 8px 20px 0; }
+      .jar-scene { padding: 100px 20px 0; }
       .jar-wrap { width: 140px; }
       .jar { width: 110px; }
       .jar-body { width: 110px; height: 140px; }
@@ -470,6 +465,30 @@
       .quote-card { padding: 40px 32px; }
     }
 
+    /* ── SOCIAL PROOF ── */
+    .hero-social {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: -4px;
+    }
+    .avatars {
+      display: flex;
+    }
+    .av {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--warm-bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-left: -8px;
+    }
+    .avatars .av:first-child { margin-left: 0; }
+    .hero-sub { font-size: 0.82rem; color: var(--muted); }
+    .hero-sub strong { color: var(--text); }
+
     /* Tally button reset */
     [data-tally-open] { font-family: inherit; }
   </style>
@@ -500,7 +519,15 @@
       data-tally-emoji-animation="wave">
       Join the Waitlist
     </button>
-    <p class="hero-sub">Free to join · No spam · Ever.</p>
+    <div class="hero-social">
+      <div class="avatars">
+        <div class="av" style="background: var(--peach);">S</div>
+        <div class="av" style="background: var(--sage);">M</div>
+        <div class="av" style="background: var(--lavender);">R</div>
+        <div class="av" style="background: var(--sky);">A</div>
+      </div>
+      <p class="hero-sub"><strong>583 people</strong> already on the waitlist · Free · No spam</p>
+    </div>
   </section>
 
   <!-- JAR SCENE -->
