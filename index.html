@@ -491,8 +491,9 @@
       object-fit: cover;
     }
     .avatars .av:first-child { margin-left: 0; }
-    .hero-sub { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+    .hero-sub { font-size: 0.82rem; color: var(--text); line-height: 1.6; }
     .hero-sub strong { color: var(--text); }
+    .hero-sub-meta { color: var(--muted); font-size: 0.78rem; }
 
     /* Tally button reset */
     [data-tally-open] { font-family: inherit; }
@@ -531,7 +532,10 @@
         <img class="av" src="https://i.pravatar.cc/40?img=32" alt="user" />
         <img class="av" src="https://i.pravatar.cc/40?img=9"  alt="user" />
       </div>
-      <p class="hero-sub"><strong>583+ people</strong> already on the waitlist &nbsp;·&nbsp; No credit card &nbsp;·&nbsp; No spam</p>
+      <div class="hero-sub">
+        <div><strong>583+ people</strong> already on the waitlist</div>
+        <div class="hero-sub-meta">No credit card &nbsp;·&nbsp; No spam</div>
+      </div>
     </div>
   </section>
 
