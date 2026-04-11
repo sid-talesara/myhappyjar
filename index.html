@@ -280,8 +280,11 @@
     .features h2 span { color: #C1803A; }
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 20px;
+    }
+    @media (max-width: 600px) {
+      .cards { grid-template-columns: 1fr; }
     }
     .card {
       background: white;
@@ -440,7 +443,7 @@
 
       /* Features */
       .features { padding: 56px 20px; }
-      .cards { grid-template-columns: 1fr; gap: 16px; }
+      .cards { gap: 16px; }
       .card { padding: 22px 20px; }
 
       /* How it works */
@@ -528,7 +531,7 @@
         <img class="av" src="https://i.pravatar.cc/40?img=32" alt="user" />
         <img class="av" src="https://i.pravatar.cc/40?img=9"  alt="user" />
       </div>
-      <p class="hero-sub"><strong>583 people</strong> already on the waitlist &nbsp;·&nbsp; Free &nbsp;·&nbsp; No spam</p>
+      <p class="hero-sub"><strong>583+ people</strong> already on the waitlist &nbsp;·&nbsp; No credit card &nbsp;·&nbsp; No spam</p>
     </div>
   </section>
 
