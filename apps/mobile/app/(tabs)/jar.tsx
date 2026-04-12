@@ -1,24 +1,10 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text } from '@myhappyjar/ui';
+import { JarScreen } from '../../src/features/jar';
 
 /**
- * Jar/Home screen stub.
- * Home/Jar feature squad implements the primary jar experience.
+ * Jar tab — delegates entirely to the JarScreen feature component.
+ * Tab bar is provided by (tabs)/_layout.tsx.
  */
-export default function JarScreen() {
-  return (
-    <View style={styles.container}>
-      <Text variant="body">Jar / Home coming soon</Text>
-    </View>
-  );
+export default function JarTab() {
+  return <JarScreen />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F5F0E8',
-  },
-});
