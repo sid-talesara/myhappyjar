@@ -5,3 +5,8 @@ build
 .expo
 .turbo
 coverage
+node_modules/
+dist/
+.expo/
+*.log
+coverage/

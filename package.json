@@ -1,14 +1,22 @@
 {
   "name": "myhappyjar",
   "private": true,
-  "version": "0.1.0",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
-    "dev:landing": "npm run dev --workspace @myhappyjar/landing",
-    "dev:web": "npm run dev --workspace @myhappyjar/web",
-    "dev:native": "npm run dev --workspace @myhappyjar/native"
-  }
+    "dev": "pnpm --filter @myhappyjar/mobile run start",
+    "dev:landing": "cd apps/landing && python3 -m http.server 4173",
+    "test": "pnpm -r run test",
+    "test:core": "pnpm --filter @myhappyjar/core run test",
+    "lint": "eslint . --ext .ts,.tsx",
+    "typecheck": "pnpm -r run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "packageManager": "pnpm@9.12.0"
 }
