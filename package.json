@@ -1,0 +1,14 @@
+{
+  "name": "myhappyjar",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:landing": "npm run dev --workspace @myhappyjar/landing",
+    "dev:web": "npm run dev --workspace @myhappyjar/web",
+    "dev:native": "npm run dev --workspace @myhappyjar/native"
+  }
+}
