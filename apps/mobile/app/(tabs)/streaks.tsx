@@ -1,24 +1,10 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text } from '@myhappyjar/ui';
+import { StreaksScreen } from '../../src/features/streaks';
 
 /**
- * Streaks screen stub.
- * Streaks feature squad implements consecutive-day tracking.
+ * Streaks tab — consecutive-day tracking with editorial calendar visualization.
+ * Implementation: apps/mobile/src/features/streaks/
  */
-export default function StreaksScreen() {
-  return (
-    <View style={styles.container}>
-      <Text variant="body">Streaks coming soon</Text>
-    </View>
-  );
+export default function StreaksTab() {
+  return <StreaksScreen />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F5F0E8',
-  },
-});
