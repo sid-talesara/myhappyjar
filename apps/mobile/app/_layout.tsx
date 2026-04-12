@@ -31,9 +31,6 @@ export default function RootLayout() {
         <ThemeProvider>
           <DbProvider>
             <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="onboarding" options={{ headerShown: false }} />
               <Stack.Screen name="add-note" options={{ presentation: 'modal', headerShown: false }} />
             </Stack>
           </DbProvider>
