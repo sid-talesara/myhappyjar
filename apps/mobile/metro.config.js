@@ -10,8 +10,14 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ];
-// NOTE: disableHierarchicalLookup is intentionally NOT set (defaults to false).
-// pnpm overrides in root package.json pin react-native@0.76.3 and react@18.3.1
-// across all packages, eliminating phantom react-native@0.85.0 virtual store instances
-// that Metro might otherwise pick up via hierarchical traversal.
+
+// Force Metro to resolve react-native-svg and react-native-gesture-handler
+// to the single hoisted copy in the mobile app's node_modules.
+// This prevents the RNSVGCircle duplicate-view-name invariant violation
+// caused by pnpm's virtual store having multiple peer-resolved copies.
+config.resolver.extraNodeModules = {
+  'react-native-svg': path.resolve(projectRoot, 'node_modules/react-native-svg'),
+  'react-native-gesture-handler': path.resolve(projectRoot, 'node_modules/react-native-gesture-handler'),
+};
+
 module.exports = config;
