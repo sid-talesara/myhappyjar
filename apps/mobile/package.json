@@ -1,7 +1,7 @@
 {
   "name": "@myhappyjar/mobile",
   "version": "0.0.1",
-  "main": "expo-router/entry",
+  "main": "index.js",
   "scripts": {
     "start": "expo start",
     "ios": "expo run:ios",
