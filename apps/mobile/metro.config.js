@@ -5,24 +5,16 @@ const projectRoot = __dirname;
 const workspaceRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
+
+// Watch workspace root so Metro can resolve packages like @myhappyjar/ui.
 config.watchFolders = [workspaceRoot];
+
+// With node-linker=hoisted in .npmrc, pnpm installs a flat layout so Metro's
+// default resolution finds the single hoisted copy of every native module.
+// We still list both roots so workspace symlinks resolve correctly.
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ];
-
-// Force Metro to resolve react-native-svg and react-native-gesture-handler
-// to the single hoisted copy in the mobile app's node_modules.
-// This prevents the RNSVGCircle duplicate-view-name invariant violation
-// caused by pnpm's virtual store having multiple peer-resolved copies.
-// expo and expo-router are pinned here so that Expo CLI's custom resolvers
-// (which run with EXPO_NO_METRO_WORKSPACE_ROOT=1) can find them from the
-// mobile app's symlinked node_modules rather than searching up the tree.
-config.resolver.extraNodeModules = {
-  'expo': path.resolve(projectRoot, 'node_modules/expo'),
-  'expo-router': path.resolve(projectRoot, 'node_modules/expo-router'),
-  'react-native-svg': path.resolve(projectRoot, 'node_modules/react-native-svg'),
-  'react-native-gesture-handler': path.resolve(projectRoot, 'node_modules/react-native-gesture-handler'),
-};
 
 module.exports = config;
