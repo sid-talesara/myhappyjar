@@ -27,20 +27,34 @@ jest.mock('../services/reducedMotion', () => ({
 }));
 
 jest.mock('react-native-reanimated', () => {
-  const actual = jest.requireActual('react-native-reanimated/mock');
+  // Inline mock — avoids loading native worklets (Reanimated v4 split)
+  const mockSharedValue = (init: unknown) => ({ value: init });
   return {
-    ...actual,
+    __esModule: true,
+    default: { createAnimatedComponent: (c: unknown) => c },
+    useSharedValue: mockSharedValue,
+    useDerivedValue: (fn: () => unknown) => mockSharedValue(fn()),
+    useAnimatedStyle: (fn: () => unknown) => fn(),
     withTiming: (_toValue: number, _config: unknown, callback?: (finished: boolean) => void) => {
-      // Immediately invoke callback synchronously in tests
       if (callback) callback(true);
       return _toValue;
     },
+    withSpring: (toValue: number, _config: unknown, callback?: (finished: boolean) => void) => {
+      if (callback) callback(true);
+      return toValue;
+    },
     runOnJS: (fn: (...args: unknown[]) => unknown) => fn,
+    runOnUI: (fn: (...args: unknown[]) => unknown) => fn,
     Easing: {
       bezier: () => (t: number) => t,
       out: () => (t: number) => t,
+      in: () => (t: number) => t,
       cubic: (t: number) => t,
+      linear: (t: number) => t,
     },
+    interpolate: (v: number) => v,
+    Extrapolation: { CLAMP: 'clamp' },
+    createAnimatedComponent: (c: unknown) => c,
   };
 });
 

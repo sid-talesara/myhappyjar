@@ -8,10 +8,31 @@
     "scheme": "myhappyjar",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "splash": { "image": "./assets/splash.png", "resizeMode": "contain", "backgroundColor": "#F5F0E8" },
-    "ios": { "supportsTablet": false, "bundleIdentifier": "com.myhappyjar.app" },
-    "android": { "package": "com.myhappyjar.app", "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#F5F0E8" } },
-    "plugins": ["expo-router", "expo-font", "expo-sqlite"],
-    "experiments": { "typedRoutes": true }
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F5F0E8"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.myhappyjar.app"
+    },
+    "android": {
+      "package": "com.myhappyjar.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F5F0E8"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-sqlite",
+      "expo-audio",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

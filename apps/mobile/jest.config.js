@@ -15,6 +15,8 @@ const allowList = [
   'sentry-expo',
   'native-base',
   'react-native-svg',
+  'react-native-reanimated',
+  'react-native-worklets',
   '@gorhom(/.*)?',
 ].join('|');
 
