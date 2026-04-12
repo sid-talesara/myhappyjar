@@ -1,8 +1,0 @@
-{
-  "name": "@myhappyjar/native",
-  "private": true,
-  "version": "0.1.0",
-  "scripts": {
-    "dev": "echo 'Scaffold the React Native app in apps/native' && exit 0"
-  }
-}
