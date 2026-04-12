@@ -30,7 +30,9 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider>
           <DbProvider>
-            <Stack screenOptions={{ headerShown: false }} />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="add-note" options={{ presentation: 'modal', headerShown: false }} />
+            </Stack>
           </DbProvider>
         </ThemeProvider>
       </SafeAreaProvider>
