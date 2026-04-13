@@ -6,6 +6,5 @@ import { JarScreen } from '../../src/features/jar';
  * Tab bar is provided by (tabs)/_layout.tsx.
  */
 export default function JarTab() {
-  console.log('[JarTab] render');
   return <JarScreen />;
 }

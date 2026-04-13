@@ -25,7 +25,6 @@ export default function Index() {
       // DB not ready or missing row — default to onboarding
       onboardingCompleted = false;
     }
-    console.log('[Index]', { onboardingCompleted });
     router.replace(onboardingCompleted ? '/(tabs)/jar' : '/onboarding');
   }, [db]);
 

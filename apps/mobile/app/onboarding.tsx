@@ -44,8 +44,6 @@ export default function OnboardingRoute() {
       },
     });
 
-  console.log('[Onboarding] render', { currentStep });
-
   const step = ONBOARDING_STEPS[currentStep];
 
   return (

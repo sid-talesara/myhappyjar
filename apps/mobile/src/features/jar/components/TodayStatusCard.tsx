@@ -18,7 +18,6 @@ interface TodayStatusCardProps {
  */
 export function TodayStatusCard({ todayNote }: TodayStatusCardProps) {
   const router = useRouter();
-  console.log('[TodayStatusCard] render', { hasNote: !!todayNote });
 
   if (!todayNote) {
     // State 1: no note
