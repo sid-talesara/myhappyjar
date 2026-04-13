@@ -30,7 +30,10 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider>
           <DbProvider>
-            <Stack screenOptions={{ headerShown: false }}>
+            <Stack initialRouteName="index" screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="onboarding" />
+              <Stack.Screen name="(tabs)" />
               <Stack.Screen
                 name="add-note"
                 options={{

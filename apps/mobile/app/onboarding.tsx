@@ -36,13 +36,15 @@ export default function OnboardingRoute() {
       db,
       onComplete: () => {
         track('first_note_started_from_onboarding');
-        router.replace('/add-note');
+        router.replace('/(tabs)/jar');
       },
       onSkip: () => {
         // Skip intentionally: send to jar, not add-note
         router.replace('/(tabs)/jar');
       },
     });
+
+  console.log('[Onboarding] render', { currentStep });
 
   const step = ONBOARDING_STEPS[currentStep];
 
