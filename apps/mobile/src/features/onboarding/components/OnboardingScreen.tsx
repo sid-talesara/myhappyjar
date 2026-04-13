@@ -3,8 +3,8 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -52,6 +52,8 @@ export function OnboardingScreen({
 }: OnboardingScreenProps) {
   const contentOpacity = useSharedValue(0);
   const contentTranslateY = useSharedValue(16);
+  // Guard against re-entrant CTA calls (gesture system spurious events, double-tap, etc.)
+  const ctaPendingRef = React.useRef(false);
 
   React.useEffect(() => {
     // Reset before animating in
@@ -78,6 +80,14 @@ export function OnboardingScreen({
   }));
 
   const handleCTA = () => {
+    // Guard: drop duplicate/spurious activations (e.g. from gesture handler init).
+    if (ctaPendingRef.current) return;
+    ctaPendingRef.current = true;
+    // Release after one frame so the next intentional tap is accepted.
+    requestAnimationFrame(() => {
+      ctaPendingRef.current = false;
+    });
+
     if (isLastStep) {
       onComplete();
     } else {
@@ -105,13 +115,11 @@ export function OnboardingScreen({
           </TouchableOpacity>
         )}
 
-        {/* Visual area — top 55%, tappable to advance */}
-        <TouchableOpacity
+        {/* Visual area — top 55%. NOT tappable: CTA button is the sole advance trigger. */}
+        <View
           style={styles.visualArea}
-          onPress={handleCTA}
-          activeOpacity={1}
-          accessibilityLabel={step.title}
-          accessibilityHint="Tap to continue"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
         >
           {showFoldedNote ? (
             <View style={styles.visualRow}>
@@ -121,7 +129,7 @@ export function OnboardingScreen({
           ) : (
             <JarVisual visual={step.visual} reducedMotion={reducedMotion} size={200} />
           )}
-        </TouchableOpacity>
+        </View>
 
         {/* Copy + pagination + CTA — bottom 45% */}
         <Animated.View style={[styles.copyArea, contentStyle]}>
