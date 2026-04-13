@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { useTheme } from '@myhappyjar/ui';
 import {
@@ -16,6 +16,10 @@ import {
  */
 export default function TabsLayout() {
   const theme = useTheme();
+
+  useEffect(() => {
+    console.log('[TabsLayout] mounted');
+  }, []);
 
   return (
     <Tabs

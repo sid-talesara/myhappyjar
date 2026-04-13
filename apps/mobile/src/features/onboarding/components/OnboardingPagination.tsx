@@ -12,11 +12,16 @@ interface OnboardingPaginationProps {
 }
 
 /**
- * 6 dot pagination. Current step: filled terracotta dot. Others: muted ink ring.
+ * Unobtrusive pagination — 6px dots, 8px gap.
+ * Active: filled terracotta. Inactive: 20% opacity muted ink.
  */
 export function OnboardingPagination({ total, current }: OnboardingPaginationProps) {
   return (
-    <View style={styles.row} accessibilityLabel={`Step ${current + 1} of ${total}`}>
+    <View
+      style={styles.row}
+      accessibilityLabel={`Step ${current + 1} of ${total}`}
+      accessible
+    >
       {Array.from({ length: total }).map((_, i) => (
         <View
           key={i}
@@ -37,19 +42,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   dotActive: {
     backgroundColor: COLORS.accentWarm,
-    width: 20,
-    borderRadius: 4,
   },
   dotInactive: {
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: COLORS.inkMuted,
-    opacity: 0.5,
+    backgroundColor: COLORS.inkMuted,
+    opacity: 0.2,
   },
 });

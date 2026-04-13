@@ -1,11 +1,16 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text, useTheme, colors as palette } from '@myhappyjar/ui';
+import { View, StyleSheet, Text as RNText } from 'react-native';
+import { useTheme, colors as palette } from '@myhappyjar/ui';
 import type { NoteColor } from '@myhappyjar/core';
 import { generateMonthGrid, dateToKey } from '../lib/monthGrid';
 import type { DateKeyColorMap } from '../hooks/useStreaks';
 
 const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
 
 /** Map NoteColor to hex using the design token palette */
 const NOTE_COLOR_HEX: Record<NoteColor, string> = {
@@ -29,16 +34,23 @@ interface MonthCalendarProps {
 
 /**
  * MonthCalendar
- * 7-column × 6-row dot grid.
- * - Days with notes: filled circle in note color (or terracotta default)
- * - Empty days in month: hairline circle in inkMuted
- * - Days outside current month: very faint (no dot, no ring)
- * - Today: thin ink ring overlay
+ * 7-column × 6-row dot grid with editorial polish.
+ *
+ * Dot rules:
+ *   - Note day:     10px filled circle in note's actual color
+ *   - Empty day:    10px outline circle, inkMuted at 30% opacity, 1px stroke
+ *   - Today:        1.5px ink ring around dot (whether filled or empty)
+ *   - Padding days: all rendered at 30% opacity (prev/next month dates)
+ *
+ * Header: S M T W T F S in DM Sans 11pt inkMuted letterSpacing 1
+ * Hairline separator below headers.
+ * Cell tap target: 44×44.
  */
 export function MonthCalendar({ year, month, dateKeyColorMap, todayKey }: MonthCalendarProps) {
   const { colors } = useTheme();
 
   const grid = useMemo(() => generateMonthGrid(year, month), [year, month]);
+  const monthName = MONTH_NAMES[month - 1];
 
   return (
     <View style={styles.container}>
@@ -46,28 +58,44 @@ export function MonthCalendar({ year, month, dateKeyColorMap, todayKey }: MonthC
       <View style={styles.headerRow}>
         {DAY_LABELS.map((label, i) => (
           <View key={i} style={styles.cell}>
-            <Text
-              variant="caption"
-              style={[styles.dayLabel, { color: colors.inkMuted }]}
-            >
+            <RNText style={[styles.dayLabel, { color: colors.inkMuted }]}>
               {label}
-            </Text>
+            </RNText>
           </View>
         ))}
       </View>
+
+      {/* Hairline separator below column headers */}
+      <View style={[styles.headerDivider, { backgroundColor: colors.paperAlt }]} />
 
       {/* Calendar rows */}
       {grid.map((week, rowIdx) => (
         <View key={rowIdx} style={styles.row}>
           {week.map((date, colIdx) => {
             const key = dateToKey(date);
-            const isCurrentMonth = date.getMonth() + 1 === month && date.getFullYear() === year;
+            const isCurrentMonth =
+              date.getMonth() + 1 === month && date.getFullYear() === year;
             const hasNote = Boolean(dateKeyColorMap[key]);
             const isToday = key === todayKey;
             const noteColor = hasNote ? NOTE_COLOR_HEX[dateKeyColorMap[key]] : null;
+            const dayNum = date.getDate();
+
+            const a11yMonthName = isCurrentMonth
+              ? monthName
+              : date.getMonth() + 1 < month
+              ? MONTH_NAMES[date.getMonth()]
+              : MONTH_NAMES[date.getMonth()];
+            const a11yYear = date.getFullYear();
+            const a11yLabel = `${a11yMonthName} ${dayNum} ${a11yYear}, ${hasNote ? 'filled' : 'empty'}`;
 
             return (
-              <View key={colIdx} style={styles.cell}>
+              <View
+                key={colIdx}
+                style={styles.cell}
+                accessible
+                accessibilityLabel={a11yLabel}
+                accessibilityRole="text"
+              >
                 <DotCell
                   isCurrentMonth={isCurrentMonth}
                   hasNote={hasNote}
@@ -93,33 +121,50 @@ interface DotCellProps {
 }
 
 function DotCell({ isCurrentMonth, hasNote, isToday, noteColor, colors }: DotCellProps) {
-  const DOT_SIZE = 24;
+  // Padding days (prev/next month): same dot but 30% opacity
+  const outerOpacity = isCurrentMonth ? 1 : 0.3;
 
-  if (!isCurrentMonth) {
-    // Outside current month: invisible placeholder
-    return <View style={{ width: DOT_SIZE, height: DOT_SIZE }} />;
-  }
+  // Today ring: 12px container to accommodate 1.5px ring with padding
+  // Note/empty dots: 10px
+  const dotSize = isToday ? 12 : 10;
+  const borderRadius = dotSize / 2;
 
   return (
-    <View
-      style={[
-        styles.dot,
-        { width: DOT_SIZE, height: DOT_SIZE, borderRadius: DOT_SIZE / 2 },
-        // Filled vs. empty
-        hasNote
-          ? { backgroundColor: noteColor ?? colors.accentWarm }
-          : {
-              backgroundColor: 'transparent',
-              borderWidth: StyleSheet.hairlineWidth,
-              borderColor: colors.inkMuted,
+    <View style={[styles.dotWrapper, { opacity: outerOpacity }]}>
+      {hasNote ? (
+        // Filled dot in note color
+        <View
+          style={[
+            styles.dot,
+            {
+              width: dotSize,
+              height: dotSize,
+              borderRadius,
+              backgroundColor: noteColor ?? colors.accentWarm,
+              // Today ring around filled dot
+              ...(isToday
+                ? { borderWidth: 1.5, borderColor: colors.ink }
+                : {}),
             },
-        // Today ring: thin ink overlay border
-        isToday && {
-          borderWidth: 1.5,
-          borderColor: colors.ink,
-        },
-      ]}
-    />
+          ]}
+        />
+      ) : (
+        // Empty day: outline circle inkMuted 30%
+        <View
+          style={[
+            styles.dot,
+            {
+              width: dotSize,
+              height: dotSize,
+              borderRadius,
+              backgroundColor: 'transparent',
+              borderWidth: isToday ? 1.5 : 1,
+              borderColor: isToday ? colors.ink : `${colors.inkMuted}4D`, // 4D ≈ 30% opacity
+            },
+          ]}
+        />
+      )}
+    </View>
   );
 }
 
@@ -129,21 +174,35 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    marginBottom: 4,
+    marginBottom: 8,
+  },
+  headerDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginBottom: 8,
+    marginHorizontal: 0,
   },
   row: {
     flexDirection: 'row',
-    marginBottom: 6,
+    marginBottom: 2,
   },
   cell: {
     flex: 1,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 32,
   },
   dayLabel: {
+    fontFamily: 'DM Sans',
     fontSize: 11,
     fontWeight: '400',
+    letterSpacing: 1,
+  },
+  dotWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 20,
+    height: 20,
   },
   dot: {
     alignItems: 'center',

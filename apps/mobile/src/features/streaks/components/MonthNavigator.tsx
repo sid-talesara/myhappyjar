@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { CaretLeft, CaretRight } from 'phosphor-react-native';
 import { Text } from '@myhappyjar/ui';
 import { useTheme } from '@myhappyjar/ui';
+import * as ExpoHaptics from 'expo-haptics';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -15,30 +16,69 @@ interface MonthNavigatorProps {
   month: number;
   onPrev: () => void;
   onNext: () => void;
+  /** Disable prev arrow (earliest available month) */
+  disablePrev?: boolean;
+  /** Disable next arrow (current month is today's month) */
+  disableNext?: boolean;
+  /** Whether device haptics are enabled per user preferences */
+  hapticsEnabled?: boolean;
 }
 
 /**
  * MonthNavigator
- * Centered month/year label with prev/next arrow affordances.
- * Arrows use Phosphor Light weight CaretLeft/CaretRight.
+ * Centered "April 2026" in Lora 18pt with Phosphor Light carets.
+ * 44×44 tap targets. Optional haptic feedback on month change.
  */
-export function MonthNavigator({ year, month, onPrev, onNext }: MonthNavigatorProps) {
+export function MonthNavigator({
+  year,
+  month,
+  onPrev,
+  onNext,
+  disablePrev = false,
+  disableNext = false,
+  hapticsEnabled = true,
+}: MonthNavigatorProps) {
   const { colors } = useTheme();
+
+  function fireHaptic() {
+    if (!hapticsEnabled) return;
+    ExpoHaptics.impactAsync(ExpoHaptics.ImpactFeedbackStyle.Light).catch(() => {});
+  }
+
+  function handlePrev() {
+    if (disablePrev) return;
+    fireHaptic();
+    onPrev();
+  }
+
+  function handleNext() {
+    if (disableNext) return;
+    fireHaptic();
+    onNext();
+  }
+
+  const prevColor = disablePrev
+    ? `${colors.inkMuted}55`
+    : colors.inkMuted;
+  const nextColor = disableNext
+    ? `${colors.inkMuted}55`
+    : colors.inkMuted;
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        onPress={onPrev}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        onPress={handlePrev}
+        disabled={disablePrev}
         style={styles.arrow}
         accessibilityLabel="Previous month"
         accessibilityRole="button"
+        accessibilityState={{ disabled: disablePrev }}
       >
-        <CaretLeft size={20} color={colors.inkMuted} weight="light" />
+        <CaretLeft size={20} color={prevColor} weight="light" />
       </TouchableOpacity>
 
       <Text
-        variant="caption"
+        variant="display"
         style={[styles.label, { color: colors.ink }]}
         accessibilityRole="text"
         accessibilityLabel={`${MONTH_NAMES[month - 1]} ${year}`}
@@ -47,13 +87,14 @@ export function MonthNavigator({ year, month, onPrev, onNext }: MonthNavigatorPr
       </Text>
 
       <TouchableOpacity
-        onPress={onNext}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        onPress={handleNext}
+        disabled={disableNext}
         style={styles.arrow}
         accessibilityLabel="Next month"
         accessibilityRole="button"
+        accessibilityState={{ disabled: disableNext }}
       >
-        <CaretRight size={20} color={colors.inkMuted} weight="light" />
+        <CaretRight size={20} color={nextColor} weight="light" />
       </TouchableOpacity>
     </View>
   );
@@ -76,9 +117,8 @@ const styles = StyleSheet.create({
   label: {
     flex: 1,
     textAlign: 'center',
-    fontWeight: '500',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    fontSize: 12,
+    fontSize: 18,
+    fontWeight: '400',
+    letterSpacing: 0.2,
   },
 });

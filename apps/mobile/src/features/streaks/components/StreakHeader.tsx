@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text as RNText } from 'react-native';
 import { Text } from '@myhappyjar/ui';
 import { useTheme } from '@myhappyjar/ui';
 
@@ -9,36 +9,69 @@ interface StreakHeaderProps {
 }
 
 /**
- * StreakHeader
- * Displays the current streak count in large Lora italic style
- * and the longest streak as a DM Sans caption alongside.
+ * StreakHeader — editorial streak display.
  *
- * Design: no gamification bars, no XP — editorial feel.
+ * Layout (current > 0):
+ *   "CURRENT STREAK"  — DM Sans 11pt allcaps inkMuted letterSpacing 2
+ *   "7" + " days"     — Lora italic: 72pt ink + 22pt inkMuted inline
+ *   "Longest: 23 days" — DM Sans 13pt inkMuted
+ *
+ * Zero state:
+ *   "0"               — Lora italic 72pt inkMuted
+ *   " days"           — Lora italic 22pt inkMuted
+ *   "Your first moment is the start." — DM Sans 13pt inkMuted
  */
 export function StreakHeader({ current, longest }: StreakHeaderProps) {
   const { colors } = useTheme();
 
-  const streakLabel = current === 1 ? 'day' : 'days';
+  const longestLabel = longest === 1 ? 'day' : 'days';
+  const isZero = current === 0;
+  const numberColor = isZero ? colors.inkMuted : colors.ink;
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      accessibilityLabel={`Current streak: ${current} ${current === 1 ? 'day' : 'days'}`}
+      accessibilityRole="text"
+    >
+      {/* Label row */}
       <Text
-        variant="display"
-        style={[styles.currentCount, { color: colors.ink, fontStyle: 'italic', fontSize: 64, lineHeight: 72 }]}
-        accessibilityRole="text"
-        accessibilityLabel={`Current streak: ${current} ${streakLabel}`}
+        variant="caption"
+        style={[styles.label, { color: colors.inkMuted }]}
+        accessibilityRole="none"
       >
-        {current} {streakLabel}
+        CURRENT STREAK
       </Text>
-      <View style={styles.subRow}>
-        <Text variant="caption" style={{ color: colors.inkMuted }}>
-          Current streak
-        </Text>
-        <View style={[styles.dot, { backgroundColor: colors.inkMuted }]} />
-        <Text variant="caption" style={{ color: colors.inkMuted }}>
-          Longest: {longest} {longest === 1 ? 'day' : 'days'}
-        </Text>
+
+      {/* Number + unit row */}
+      <View style={styles.numberRow}>
+        <RNText
+          style={[styles.numberText, { color: numberColor }]}
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+        >
+          {current}
+        </RNText>
+        <RNText
+          style={[styles.unitText, { color: colors.inkMuted }]}
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+        >
+          {' '}
+          {current === 1 ? 'day' : 'days'}
+        </RNText>
       </View>
+
+      {/* Sub-caption */}
+      <Text
+        variant="caption"
+        style={[styles.subCaption, { color: colors.inkMuted }]}
+        accessibilityRole="none"
+      >
+        {isZero
+          ? 'Your first moment is the start.'
+          : `Longest: ${longest} ${longestLabel}`}
+      </Text>
     </View>
   );
 }
@@ -49,18 +82,34 @@ const styles = StyleSheet.create({
     paddingTop: 32,
     paddingBottom: 16,
   },
-  currentCount: {
-    letterSpacing: -1,
+  label: {
+    fontSize: 11,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginBottom: 4,
   },
-  subRow: {
+  numberRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    gap: 8,
+    alignItems: 'baseline',
   },
-  dot: {
-    width: 3,
-    height: 3,
-    borderRadius: 2,
+  numberText: {
+    fontFamily: 'Lora',
+    fontSize: 72,
+    fontWeight: '400',
+    fontStyle: 'italic',
+    lineHeight: 80,
+    letterSpacing: -2,
+  },
+  unitText: {
+    fontFamily: 'Lora',
+    fontSize: 22,
+    fontWeight: '400',
+    fontStyle: 'italic',
+    lineHeight: 80,
+    marginBottom: 4,
+  },
+  subCaption: {
+    fontSize: 13,
+    marginTop: 2,
   },
 });

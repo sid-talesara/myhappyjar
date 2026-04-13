@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, AccessibilityInfo } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useDb } from '../src/providers/DbProvider';
@@ -14,6 +14,8 @@ export default function OnboardingRoute() {
   const router = useRouter();
   const db = useDb();
   const [reducedMotion, setReducedMotion] = useState(false);
+  // Guard: fire onboarding_started exactly once, not on every re-render
+  const startedRef = useRef(false);
 
   useEffect(() => {
     // Check reduced motion preference
@@ -23,7 +25,8 @@ export default function OnboardingRoute() {
   }, []);
 
   useEffect(() => {
-    // Fire onboarding_started on mount
+    if (startedRef.current) return;
+    startedRef.current = true;
     track('onboarding_started');
     track('onboarding_step_viewed', { step: 0, stepName: ONBOARDING_STEPS[0].name });
   }, []);
@@ -33,11 +36,10 @@ export default function OnboardingRoute() {
       db,
       onComplete: () => {
         track('first_note_started_from_onboarding');
-        // TODO: swap to /add-note when the Add Note squad wires that route.
-        // For now, navigate to jar tab as fallback.
-        router.replace('/(tabs)/jar');
+        router.replace('/add-note');
       },
       onSkip: () => {
+        // Skip intentionally: send to jar, not add-note
         router.replace('/(tabs)/jar');
       },
     });

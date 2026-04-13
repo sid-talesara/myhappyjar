@@ -4,14 +4,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  AccessibilityInfo,
 } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   Easing,
-  runOnJS,
 } from 'react-native-reanimated';
 import { Text, Button } from '@myhappyjar/ui';
 import { OnboardingPagination } from './OnboardingPagination';
@@ -23,6 +21,7 @@ const COLORS = {
   bg: '#F5F0E8',
   ink: '#2C231A',
   inkMuted: '#7A6E64',
+  accentWarm: '#C4673A',
 };
 
 interface OnboardingScreenProps {
@@ -38,8 +37,8 @@ interface OnboardingScreenProps {
 
 /**
  * Shared layout for all onboarding screens.
- * Visual area (top) + copy (middle) + CTA + skip (bottom).
- * Tap anywhere on the visual area skips/advances animation.
+ * Visual area: top 55%. Copy + pagination + CTA: bottom 45%.
+ * Transition: fade + 16px y-translate, 220ms ease-out (reduced-motion: fade only, 120ms).
  */
 export function OnboardingScreen({
   step,
@@ -56,20 +55,20 @@ export function OnboardingScreen({
 
   React.useEffect(() => {
     // Reset before animating in
+    contentOpacity.value = 0;
+    contentTranslateY.value = reducedMotion ? 0 : 16;
+
     if (!reducedMotion) {
-      contentOpacity.value = 0;
-      contentTranslateY.value = 16;
       contentOpacity.value = withTiming(1, {
-        duration: 280,
+        duration: 220,
         easing: Easing.out(Easing.cubic),
       });
       contentTranslateY.value = withTiming(0, {
-        duration: 280,
+        duration: 220,
         easing: Easing.out(Easing.cubic),
       });
     } else {
-      contentOpacity.value = withTiming(1, { duration: 150 });
-      contentTranslateY.value = 0;
+      contentOpacity.value = withTiming(1, { duration: 120 });
     }
   }, [step.id, reducedMotion]);
 
@@ -106,30 +105,31 @@ export function OnboardingScreen({
           </TouchableOpacity>
         )}
 
-        {/* Visual area — tappable to advance */}
+        {/* Visual area — top 55%, tappable to advance */}
         <TouchableOpacity
           style={styles.visualArea}
           onPress={handleCTA}
           activeOpacity={1}
-          accessibilityLabel={step.accessibilityHint}
+          accessibilityLabel={step.title}
           accessibilityHint="Tap to continue"
         >
           {showFoldedNote ? (
             <View style={styles.visualRow}>
-              <JarVisual visual={step.visual} reducedMotion={reducedMotion} size={160} />
-              <FoldedNoteVisual reducedMotion={reducedMotion} size={100} />
+              <JarVisual visual={step.visual} reducedMotion={reducedMotion} size={150} />
+              <FoldedNoteVisual reducedMotion={reducedMotion} size={90} />
             </View>
           ) : (
-            <JarVisual visual={step.visual} reducedMotion={reducedMotion} size={220} />
+            <JarVisual visual={step.visual} reducedMotion={reducedMotion} size={200} />
           )}
         </TouchableOpacity>
 
-        {/* Copy + CTA */}
+        {/* Copy + pagination + CTA — bottom 45% */}
         <Animated.View style={[styles.copyArea, contentStyle]}>
           <Text
             variant="display"
             style={styles.title}
             accessibilityRole="header"
+            accessibilityLabel={step.title}
           >
             {step.title}
           </Text>
@@ -137,7 +137,9 @@ export function OnboardingScreen({
             {step.body}
           </Text>
 
-          <OnboardingPagination total={totalSteps} current={currentIndex} />
+          <View style={styles.paginationRow}>
+            <OnboardingPagination total={totalSteps} current={currentIndex} />
+          </View>
 
           <Button
             label={step.cta}
@@ -146,6 +148,7 @@ export function OnboardingScreen({
             onPress={handleCTA}
             style={styles.ctaButton}
             accessibilityLabel={step.cta}
+            accessibilityRole="button"
           />
         </Animated.View>
       </View>
@@ -174,20 +177,24 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'center',
   },
+  // Top 55% — visual
   visualArea: {
-    flex: 1,
+    flex: 55,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 48,
+    paddingTop: 40,
   },
   visualRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 16,
   },
+  // Bottom 45% — copy, pagination, CTA
   copyArea: {
-    paddingBottom: 32,
-    gap: 16,
+    flex: 45,
+    justifyContent: 'flex-end',
+    paddingBottom: 24,
+    gap: 12,
   },
   title: {
     lineHeight: 38,
@@ -195,7 +202,12 @@ const styles = StyleSheet.create({
   body: {
     lineHeight: 24,
   },
+  paginationRow: {
+    // Sits just above CTA, unobtrusive
+    marginVertical: 4,
+  },
   ctaButton: {
-    marginTop: 8,
+    minHeight: 48,
+    marginTop: 4,
   },
 });
