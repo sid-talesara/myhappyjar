@@ -101,7 +101,7 @@ export function StreaksScreen() {
           // Empty state: tappable prompt
           <View style={styles.caveRow}>
             <TouchableOpacity
-              onPress={() => router.push('/(tabs)/')}
+              onPress={() => router.push('/(tabs)/' as any)}
               accessibilityRole="button"
               accessibilityLabel="Press the + to drop one in"
             >
