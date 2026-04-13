@@ -1,6 +1,7 @@
 /**
  * ColorPicker — 6-swatch warm color row mapped to noteColors tokens.
  * Swatches: cream, ecru, terracotta, honey, dusk, rose
+ * Active swatch: 2px ink ring offset by 2px (halo effect via box shadow / outline view).
  */
 import React from 'react';
 import { View, Pressable, StyleSheet } from 'react-native';
@@ -26,44 +27,76 @@ export function ColorPicker({ value, onChange, editable = true }: ColorPickerPro
     <View style={styles.row} accessibilityRole="radiogroup" accessibilityLabel="Note color">
       {NOTE_COLORS.map((color) => {
         const selected = color === value;
+        const isCream = color === 'cream';
         return (
-          <Pressable
+          <View
             key={color}
-            onPress={() => editable && onChange(color)}
-            accessibilityRole="radio"
-            accessibilityLabel={color}
-            accessibilityState={{ checked: selected }}
-            style={({ pressed }) => [
-              styles.swatch,
-              { backgroundColor: COLOR_HEX[color] },
-              selected && styles.swatchSelected,
-              pressed && styles.swatchPressed,
+            style={[
+              styles.swatchWrapper,
+              selected && styles.swatchWrapperSelected,
             ]}
-            hitSlop={8}
-          />
+          >
+            <Pressable
+              onPress={() => editable && onChange(color)}
+              accessibilityRole="radio"
+              accessibilityLabel={color}
+              accessibilityState={{ checked: selected }}
+              style={({ pressed }) => [
+                styles.swatch,
+                { backgroundColor: COLOR_HEX[color] },
+                // cream needs a thin outline to distinguish from sheet bg
+                isCream && styles.swatchCreamOutline,
+                pressed && styles.swatchPressed,
+              ]}
+              hitSlop={8}
+            />
+          </View>
         );
       })}
     </View>
   );
 }
 
+const SWATCH_SIZE = 36;
+// Ring: 2px ink border, 2px offset (gap) — achieved via a wrapper view
+const RING_OFFSET = 2;
+const RING_BORDER = 2;
+const WRAPPER_SELECTED_SIZE = SWATCH_SIZE + (RING_OFFSET + RING_BORDER) * 2;
+
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     gap: 10,
     alignItems: 'center',
+    flexWrap: 'nowrap',
+  },
+  swatchWrapper: {
+    width: SWATCH_SIZE,
+    height: SWATCH_SIZE,
+    borderRadius: SWATCH_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  swatchWrapperSelected: {
+    // Halo ring: transparent gap then ink border
+    width: WRAPPER_SELECTED_SIZE,
+    height: WRAPPER_SELECTED_SIZE,
+    borderRadius: WRAPPER_SELECTED_SIZE / 2,
+    borderWidth: RING_BORDER,
+    borderColor: '#2C231A', // ink
+    // Box-model: the swatch sits inside with the ring-offset gap visible
+    backgroundColor: 'transparent',
+    // Compensate wrapper size growth with negative margin so row spacing stays uniform
+    marginHorizontal: -(RING_OFFSET + RING_BORDER),
   },
   swatch: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: 'rgba(44,35,26,0.15)',
+    width: SWATCH_SIZE,
+    height: SWATCH_SIZE,
+    borderRadius: SWATCH_SIZE / 2,
   },
-  swatchSelected: {
-    borderWidth: 2.5,
-    borderColor: '#2C231A',
-    transform: [{ scale: 1.1 }],
+  swatchCreamOutline: {
+    borderWidth: 1,
+    borderColor: '#E2D5BF', // paperAlt — thin outline on cream to distinguish from bg
   },
   swatchPressed: {
     opacity: 0.75,

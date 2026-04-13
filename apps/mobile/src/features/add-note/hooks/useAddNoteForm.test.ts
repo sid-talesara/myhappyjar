@@ -87,18 +87,18 @@ describe('useAddNoteForm', () => {
     expect(result.current.counterColor).toBe('#7A6E64');
   });
 
-  it('counterColor is warm for text >=130 chars', () => {
+  it('counterColor is honey for text 130-149 chars', () => {
     const { result } = renderHook(() =>
       useAddNoteForm({ defaultText: 'a'.repeat(135) }),
     );
-    expect(result.current.counterColor).toBe('#C4673A');
+    expect(result.current.counterColor).toBe('#D4965A'); // honey (accent-soft)
   });
 
-  it('counterColor is ink at 150 chars', () => {
+  it('counterColor is terracotta at 150 chars (cap)', () => {
     const { result } = renderHook(() =>
       useAddNoteForm({ defaultText: 'a'.repeat(150) }),
     );
-    expect(result.current.counterColor).toBe('#2C231A');
+    expect(result.current.counterColor).toBe('#C4673A'); // terracotta (accent-warm)
   });
 
   it('rejects invalid color enum via submit', async () => {

@@ -1,9 +1,17 @@
 /**
  * PromptChip — displays a random prompt-of-the-day, dismissible.
  * Fetches from DEFAULT_PROMPTS at mount; hydrates composer text on press.
+ * Tapping anywhere on the prompt card fills the textarea (haptic fired by parent).
+ *
+ * Design:
+ * - Card: bg (#F5F0E8) with paperAlt border, radius 10, padding 12
+ * - Label: Caveat 13pt inkMuted (one of the two allowed Caveat uses on this screen)
+ * - Prompt text: DM Sans 15pt ink
+ * - Dismiss X: top-right, Phosphor Light 18px, inkMuted
  */
 import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { X } from 'phosphor-react-native';
 import { DEFAULT_PROMPTS } from '@myhappyjar/core';
 
 interface PromptChipProps {
@@ -37,7 +45,7 @@ export function PromptChip({ onUsePrompt }: PromptChipProps) {
         style={styles.dismiss}
         accessibilityLabel="Dismiss prompt"
       >
-        <Text style={styles.dismissText}>×</Text>
+        <X size={18} weight="light" color="rgba(122,110,100,0.8)" />
       </Pressable>
     </View>
   );
@@ -47,36 +55,34 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#EDE6D6',
-    borderRadius: 8,
+    backgroundColor: '#F5F0E8', // bg/linen — slightly lighter than paper sheet
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: 'rgba(44,35,26,0.12)',
-    padding: 10,
+    borderColor: '#E2D5BF', // paperAlt
+    padding: 12,
     gap: 8,
   },
   promptArea: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   label: {
     fontFamily: 'Caveat_400Regular',
     fontSize: 13,
-    color: '#7A6E64',
+    color: 'rgba(122,110,100,0.8)', // inkMuted @ 80%
     letterSpacing: 0.3,
   },
   promptText: {
     fontFamily: 'DMSans_400Regular',
-    fontSize: 14,
-    color: '#2C231A',
-    lineHeight: 20,
+    fontSize: 15,
+    color: '#2C231A', // ink
+    lineHeight: 22,
   },
   dismiss: {
     paddingTop: 2,
-  },
-  dismissText: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 18,
-    color: '#7A6E64',
-    lineHeight: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 24,
+    height: 24,
   },
 });

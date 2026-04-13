@@ -37,15 +37,15 @@ export function useAddNoteForm(options: UseAddNoteFormOptions = {}) {
 
   /**
    * Counter color:
-   * - muted   (0–129): warm gray
-   * - warning (130–149): terracotta (accent-warm)
-   * - at-cap  (150): ink/dark
+   * - muted   (0–129):   inkMuted (#7A6E64)
+   * - warning (130–149): honey (#D4965A)
+   * - at-cap  (150):     terracotta/accentWarm (#C4673A)
    */
   const counterColor =
     charCount >= CHAR_LIMIT
-      ? '#2C231A'
+      ? '#C4673A'
       : charCount >= 130
-        ? '#C4673A'
+        ? '#D4965A'
         : '#7A6E64';
 
   return {

@@ -1,8 +1,11 @@
 /**
  * TagChipInput — chip input, comma or Return to add, max 5 tags, 16 chars each.
+ * Label ("TAGS") is rendered by the parent (AddNoteModal).
+ * Chips: paperAlt bg, ink text, radius 14, DM Sans 12pt. Each chip has X to remove.
  */
 import React, { useState } from 'react';
 import { View, TextInput, Text, Pressable, StyleSheet } from 'react-native';
+import { X } from 'phosphor-react-native';
 
 const MAX_TAGS = 5;
 const MAX_TAG_LENGTH = 16;
@@ -60,8 +63,9 @@ export function TagChipInput({ value, onChange, editable = true }: TagChipInputP
                 onPress={() => removeTag(tag)}
                 hitSlop={6}
                 accessibilityLabel={`Remove tag ${tag}`}
+                style={styles.chipRemoveButton}
               >
-                <Text style={styles.chipRemove}>×</Text>
+                <X size={14} weight="light" color="#7A6E64" />
               </Pressable>
             )}
           </View>
@@ -73,7 +77,7 @@ export function TagChipInput({ value, onChange, editable = true }: TagChipInputP
             onChangeText={handleChangeText}
             onSubmitEditing={handleSubmitEditing}
             placeholder={value.length === 0 ? 'Add tags...' : '+tag'}
-            placeholderTextColor="#7A6E64"
+            placeholderTextColor="rgba(122,110,100,0.7)"
             returnKeyType="done"
             blurOnSubmit={false}
             maxLength={MAX_TAG_LENGTH + 1} // +1 to allow trailing comma
@@ -103,28 +107,24 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EDE6D6',
-    borderWidth: 1,
-    borderColor: 'rgba(44,35,26,0.15)',
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    backgroundColor: '#E2D5BF', // paperAlt
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     gap: 4,
   },
   chipText: {
     fontFamily: 'DMSans_400Regular',
-    fontSize: 13,
-    color: '#2C231A',
+    fontSize: 12,
+    color: '#2C231A', // ink
   },
-  chipRemove: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 15,
-    color: '#7A6E64',
-    lineHeight: 18,
+  chipRemoveButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   input: {
     fontFamily: 'DMSans_400Regular',
-    fontSize: 14,
+    fontSize: 15,
     color: '#2C231A',
     minWidth: 80,
     height: 32,
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   },
   hint: {
     fontFamily: 'DMSans_400Regular',
-    fontSize: 12,
+    fontSize: 11,
     color: '#7A6E64',
   },
 });

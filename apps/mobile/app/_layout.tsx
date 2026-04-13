@@ -31,7 +31,15 @@ export default function RootLayout() {
         <ThemeProvider>
           <DbProvider>
             <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="add-note" options={{ presentation: 'modal', headerShown: false }} />
+              <Stack.Screen
+                name="add-note"
+                options={{
+                  presentation: 'transparentModal',
+                  headerShown: false,
+                  contentStyle: { backgroundColor: 'transparent' },
+                  animation: 'fade',
+                }}
+              />
             </Stack>
           </DbProvider>
         </ThemeProvider>

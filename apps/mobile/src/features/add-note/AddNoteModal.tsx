@@ -6,7 +6,8 @@
  * - If today's note exists AND !canEditNote → READ-ONLY ("This moment is sealed")
  * - If no note today → CREATE mode
  *
- * Sheet covers ~70% of screen height. Jar/background visible behind it.
+ * Sheet covers ~85% of screen height. Jar/background visible behind it through
+ * the transparentModal presentation + ink scrim in the route container.
  */
 import React, { useCallback, useRef, useEffect, useState } from 'react';
 import {
@@ -15,20 +16,18 @@ import {
   Pressable,
   StyleSheet,
   Alert,
-  ScrollView,
 } from 'react-native';
 import BottomSheet, {
-  BottomSheetView,
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
 import { Controller } from 'react-hook-form';
 import * as ExpoHaptics from 'expo-haptics';
+import { X } from 'phosphor-react-native';
 import {
   NoteRepository,
   PreferencesRepository,
   toDateKey,
   canEditNote,
-  canSaveToday,
 } from '@myhappyjar/core';
 import type { Note } from '@myhappyjar/core';
 
@@ -43,7 +42,8 @@ import { PromptChip } from './components/PromptChip';
 import { FoldDropAnimation, JarPulse } from './components/FoldDropAnimation';
 import type { NoteColorEnum } from '@myhappyjar/core';
 
-const SNAP_POINTS = ['70%'];
+// 85% snap — enough room for all fields to breathe
+const SNAP_POINTS = ['85%'];
 
 interface AddNoteModalProps {
   jarId: number;
@@ -104,8 +104,7 @@ export function AddNoteModal({ jarId, onDismiss, onNotesSaved }: AddNoteModalPro
   });
 
   const currentColor = watch('color') ?? 'cream';
-  const currentEmoji = watch('emoji');
-  const currentTags = watch('tags') ?? [];
+  const currentText = watch('text') ?? '';
 
   // ── Save Ritual ───────────────────────────────────────────────────────
   const {
@@ -113,7 +112,6 @@ export function AddNoteModal({ jarId, onDismiss, onNotesSaved }: AddNoteModalPro
     foldProgress,
     dropProgress,
     settleProgress,
-    sheetOpacity,
     triggerRitual,
   } = useSaveRitual({
     repository: noteRepo,
@@ -149,6 +147,13 @@ export function AddNoteModal({ jarId, onDismiss, onNotesSaved }: AddNoteModalPro
     if (!isAnimating) onDismiss();
   }, [isAnimating, onDismiss]);
 
+  const handleClosePress = useCallback(() => {
+    if (hapticsEnabled) {
+      ExpoHaptics.impactAsync(ExpoHaptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
+    handleSheetClose();
+  }, [hapticsEnabled, handleSheetClose]);
+
   const onSavePress = handleSubmit(async (values) => {
     if (!canSave || isAnimating) return;
     await triggerRitual(values);
@@ -165,14 +170,12 @@ export function AddNoteModal({ jarId, onDismiss, onNotesSaved }: AddNoteModalPro
     rose: '#C97A85',
   };
 
+  const hasText = currentText.trim().length > 0;
+
   return (
     <View style={styles.root} pointerEvents="box-none">
-      {/* Jar placeholder background */}
-      <View style={styles.jarBackground} pointerEvents="none">
-        <View style={styles.jarPlaceholder}>
-          <Text style={styles.jarPlaceholderText}>jar</Text>
-        </View>
-        {/* Jar pulse during settle */}
+      {/* Jar pulse during settle */}
+      <View style={styles.jarPulseContainer} pointerEvents="none">
         <JarPulse settleProgress={settleProgress} />
       </View>
 
@@ -186,6 +189,8 @@ export function AddNoteModal({ jarId, onDismiss, onNotesSaved }: AddNoteModalPro
         handleStyle={styles.sheetHandle}
         handleIndicatorStyle={styles.handleIndicator}
         animateOnMount
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
       >
         <BottomSheetScrollView
           contentContainerStyle={styles.sheetContent}
@@ -202,12 +207,13 @@ export function AddNoteModal({ jarId, onDismiss, onNotesSaved }: AddNoteModalPro
               })}
             </Text>
             <Pressable
-              onPress={handleSheetClose}
-              hitSlop={12}
+              onPress={handleClosePress}
               disabled={isAnimating}
               accessibilityLabel="Close"
+              style={styles.closeButton}
+              hitSlop={10}
             >
-              <Text style={styles.closeButton}>×</Text>
+              <X size={24} weight="light" color="#7A6E64" />
             </Pressable>
           </View>
 
@@ -224,7 +230,12 @@ export function AddNoteModal({ jarId, onDismiss, onNotesSaved }: AddNoteModalPro
           {/* Prompt of the day */}
           {!isReadOnly && (
             <PromptChip
-              onUsePrompt={(text) => setValue('text', text)}
+              onUsePrompt={(text) => {
+                setValue('text', text);
+                if (hapticsEnabled) {
+                  ExpoHaptics.impactAsync(ExpoHaptics.ImpactFeedbackStyle.Light).catch(() => {});
+                }
+              }}
             />
           )}
 
@@ -251,8 +262,8 @@ export function AddNoteModal({ jarId, onDismiss, onNotesSaved }: AddNoteModalPro
           )}
 
           {/* Color picker */}
-          <View style={styles.row}>
-            <Text style={styles.fieldLabel}>Color</Text>
+          <View style={styles.fieldBlock}>
+            <Text style={styles.fieldLabel}>COLOR</Text>
             <Controller
               control={control}
               name="color"
@@ -267,19 +278,23 @@ export function AddNoteModal({ jarId, onDismiss, onNotesSaved }: AddNoteModalPro
           </View>
 
           {/* Emoji + Tags row */}
-          <View style={styles.row}>
-            <Controller
-              control={control}
-              name="emoji"
-              render={({ field: { value, onChange } }) => (
-                <EmojiSlot
-                  value={value}
-                  onChange={onChange}
-                  editable={!isReadOnly}
-                />
-              )}
-            />
-            <View style={styles.tagsContainer}>
+          <View style={styles.emojiTagsRow}>
+            <View style={styles.emojiBlock}>
+              <Text style={styles.fieldLabel}>EMOJI</Text>
+              <Controller
+                control={control}
+                name="emoji"
+                render={({ field: { value, onChange } }) => (
+                  <EmojiSlot
+                    value={value}
+                    onChange={onChange}
+                    editable={!isReadOnly}
+                  />
+                )}
+              />
+            </View>
+            <View style={styles.tagsBlock}>
+              <Text style={styles.fieldLabel}>TAGS</Text>
               <Controller
                 control={control}
                 name="tags"
@@ -298,18 +313,21 @@ export function AddNoteModal({ jarId, onDismiss, onNotesSaved }: AddNoteModalPro
           {canSave && (
             <Pressable
               onPress={onSavePress}
-              disabled={isAnimating}
+              disabled={isAnimating || !hasText}
               style={({ pressed }) => [
                 styles.saveButton,
                 pressed && styles.saveButtonPressed,
-                isAnimating && styles.saveButtonDisabled,
+                (isAnimating || !hasText) && styles.saveButtonDisabled,
               ]}
               accessibilityRole="button"
               accessibilityLabel="Fold and drop into jar"
             >
               <Text style={styles.saveButtonText}>
-                {isAnimating ? '...' : 'Fold & Drop →'}
+                {isAnimating ? '...' : 'Fold & Drop'}
               </Text>
+              {!isAnimating && (
+                <Text style={styles.saveButtonArrow}>→</Text>
+              )}
             </Pressable>
           )}
         </BottomSheetScrollView>
@@ -323,44 +341,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
   },
-  jarBackground: {
+  jarPulseContainer: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
     pointerEvents: 'none',
   },
-  jarPlaceholder: {
-    width: 140,
-    height: 180,
-    borderRadius: 12,
-    backgroundColor: 'rgba(237,230,214,0.6)',
-    borderWidth: 1,
-    borderColor: 'rgba(122,110,100,0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -80,
-  },
-  jarPlaceholderText: {
-    fontFamily: 'Lora_400Regular',
-    fontSize: 20,
-    color: 'rgba(44,35,26,0.3)',
-    letterSpacing: 2,
-  },
   sheetBackground: {
-    backgroundColor: '#F5F0E8', // linen
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    backgroundColor: '#EDE6D6', // paper — cream
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#E2D5BF', // paperAlt — delineates from backdrop
   },
   sheetHandle: {
-    paddingTop: 12,
+    paddingTop: 10,
+    paddingBottom: 4,
   },
   handleIndicator: {
-    backgroundColor: 'rgba(44,35,26,0.15)',
-    width: 36,
-    height: 3,
+    backgroundColor: 'rgba(122,110,100,0.4)', // inkMuted @ 40%
+    width: 48,
+    height: 4,
+    borderRadius: 2,
   },
   sheetContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 16,
     paddingBottom: 48,
     gap: 16,
   },
@@ -368,45 +374,56 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
   },
   dateLabel: {
     fontFamily: 'Lora_400Regular',
-    fontSize: 16,
-    color: '#7A6E64',
+    fontSize: 17,
+    color: '#2C231A', // ink
   },
   closeButton: {
-    fontFamily: 'DMSans_400Regular',
-    fontSize: 24,
-    color: '#7A6E64',
-    lineHeight: 28,
+    width: 44,
+    height: 44,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  fieldBlock: {
+    gap: 8,
   },
   fieldLabel: {
     fontFamily: 'DMSans_400Regular',
-    fontSize: 13,
-    color: '#7A6E64',
-    marginBottom: 6,
+    fontSize: 12,
+    color: '#7A6E64', // inkMuted
+    letterSpacing: 1,
   },
-  row: {
-    gap: 6,
+  emojiTagsRow: {
+    flexDirection: 'row',
+    gap: 16,
+    alignItems: 'flex-start',
   },
-  tagsContainer: {
+  emojiBlock: {
+    gap: 8,
+  },
+  tagsBlock: {
     flex: 1,
+    gap: 8,
   },
   saveButton: {
-    backgroundColor: '#C4673A',
-    borderRadius: 10,
-    paddingVertical: 14,
+    backgroundColor: '#C4673A', // terracotta
+    borderRadius: 12,
+    height: 52,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 4,
     shadowColor: '#2C231A',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 4,
+    shadowRadius: 6,
     elevation: 2,
   },
   saveButtonPressed: {
-    opacity: 0.85,
+    opacity: 0.88,
     transform: [{ scale: 0.99 }],
   },
   saveButtonDisabled: {
@@ -415,11 +432,16 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontFamily: 'DMSans_500Medium',
     fontSize: 16,
+    color: '#F5F0E8', // bg/linen for warm contrast on terracotta
+  },
+  saveButtonArrow: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 18,
     color: '#F5F0E8',
-    letterSpacing: 0.3,
+    lineHeight: 22,
   },
   sealedBanner: {
-    backgroundColor: '#E2D5BF',
+    backgroundColor: '#E2D5BF', // paperAlt
     borderRadius: 8,
     padding: 14,
     gap: 4,
@@ -436,9 +458,9 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   foldPreviewText: {
-    fontFamily: 'DMSans_400Regular',
+    fontFamily: 'Lora_400Regular',
     fontSize: 15,
     color: '#2C231A',
-    lineHeight: 22,
+    lineHeight: 24,
   },
 });

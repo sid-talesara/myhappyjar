@@ -1,10 +1,11 @@
 /**
- * EmojiSlot — single-emoji picker using a TextInput.
- * MVP: simple input with maxLength constraint. User opens their emoji keyboard.
- * No native emoji picker needed.
+ * EmojiSlot — single-emoji picker using a hidden TextInput.
+ * 48×48 card with dashed border. Empty: Plus icon centered. Filled: emoji at 24pt, tap to clear.
+ * Label ("EMOJI") is rendered by the parent (AddNoteModal).
  */
 import React, { useRef } from 'react';
 import { View, TextInput, Text, Pressable, StyleSheet } from 'react-native';
+import { Plus } from 'phosphor-react-native';
 
 interface EmojiSlotProps {
   value: string | null | undefined;
@@ -21,13 +22,11 @@ export function EmojiSlot({ value, onChange, editable = true }: EmojiSlotProps) 
       return;
     }
     // Capture only the first grapheme cluster (single emoji)
-    // Using Intl.Segmenter when available, else first char
     if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
       const segmenter = new (Intl as unknown as { Segmenter: new (locale?: string) => { segment(text: string): Iterable<{ segment: string }> } }).Segmenter();
       const segments = [...segmenter.segment(text)];
       onChange(segments[0]?.segment ?? null);
     } else {
-      // Fallback: grab the first two code units (handles most emoji)
       const codePoint = text.codePointAt(0);
       if (codePoint !== undefined) {
         onChange(String.fromCodePoint(codePoint));
@@ -37,18 +36,29 @@ export function EmojiSlot({ value, onChange, editable = true }: EmojiSlotProps) 
     }
   };
 
+  const handleClear = () => {
+    onChange(null);
+  };
+
   return (
     <View style={styles.container}>
       <Pressable
-        onPress={() => editable && inputRef.current?.focus()}
+        onPress={() => {
+          if (!editable) return;
+          if (value) {
+            handleClear();
+          } else {
+            inputRef.current?.focus();
+          }
+        }}
         style={styles.slotOuter}
-        accessibilityLabel="Emoji slot"
-        accessibilityHint="Tap to add an emoji to your note"
+        accessibilityLabel={value ? `Emoji: ${value}, tap to clear` : 'Add emoji'}
+        accessibilityHint={value ? 'Tap to remove the emoji' : 'Tap to add an emoji to your note'}
       >
         {value ? (
           <Text style={styles.emoji}>{value}</Text>
         ) : (
-          <Text style={styles.placeholder}>+</Text>
+          <Plus size={20} weight="light" color="rgba(122,110,100,0.7)" />
         )}
       </Pressable>
       {/* Hidden input that captures actual emoji input */}
@@ -73,23 +83,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   slotOuter: {
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     borderRadius: 8,
-    backgroundColor: '#EDE6D6',
-    borderWidth: 1,
-    borderColor: 'rgba(44,35,26,0.15)',
+    backgroundColor: 'rgba(226,213,191,0.4)', // paperAlt very faint
+    borderWidth: 1.5,
+    borderColor: 'rgba(122,110,100,0.3)', // inkMuted @ 30%
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
   },
   emoji: {
     fontSize: 24,
-  },
-  placeholder: {
-    fontSize: 20,
-    color: '#7A6E64',
-    fontFamily: 'DMSans_400Regular',
+    lineHeight: 30,
   },
   hiddenInput: {
     position: 'absolute',
