@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import Svg, { Path, G, Defs, LinearGradient, Stop, ClipPath, Rect } from 'react-native-svg';
+import Svg, { Path, G, Defs, ClipPath, Rect, Ellipse } from 'react-native-svg';
+import { colors } from '@myhappyjar/ui';
 import type { Note } from '@myhappyjar/core';
 import { seededRandomPlacement, type JarBounds } from '../lib/notePlacement';
 import { FoldedNote } from './FoldedNote';
@@ -14,110 +15,155 @@ interface JarVisualProps {
 }
 
 /**
- * The signature jar SVG. Glass silhouette with interior folded notes.
+ * The signature jar SVG — iconic mason-jar silhouette with folded paper notes
+ * inside. Drawn with quadratic curves for soft shoulders, two-layer fill for
+ * glass thickness illusion, a banded metal lid, and a base contact shadow.
  *
- * Jar shape: a mason-jar profile with:
- *   - narrow lid/neck at top
- *   - wide body tapering slightly at bottom
- *   - thin 1px ink stroke
- *   - translucent paper-tone fill (60% opacity)
- *   - subtle inner shadow gradient on left and right walls (not decorative — depth cue)
+ * Shape anatomy (top → bottom):
+ *   lid       ~13% of jarH  — outer cap + screw band
+ *   neck      ~9%  of jarH  — narrow throat, straight sides
+ *   shoulders ~9%  of jarH  — gentle outward curve (mason-jar "hips")
+ *   body      ~55% of jarH  — widest zone
+ *   base      ~14% of jarH  — rounded via Q arc
  *
- * Notes: procedurally placed, seeded by note.id for stability across re-renders.
- * Capped at 150 nodes regardless of note count.
+ * No SVG filters, no LinearGradients — pure fill + stroke opacity for depth.
+ * Notes: deterministically placed, seeded by note.id. Cap: 150.
  */
 export function JarVisual({ notes, width, height, testID }: JarVisualProps) {
-  console.log('[JarVisual] render', { width, height, notes: notes.length });
-  // Dimensions
+  // ── Palette ────────────────────────────────────────────────────────────────
+  const INK       = colors.ink;         // #2C231A
+  const PAPER     = colors.paper;       // #EDE6D6
+  const PAPER_DEEP = '#E8DFCD';         // slightly deeper warm tint — inner glass layer
+  const PAPER_ALT  = colors.paperAlt;   // #E2D5BF — screw band fill
+
+  // ── Jar envelope ──────────────────────────────────────────────────────────
   const jarX = width * 0.08;
   const jarW = width * 0.84;
-  const jarY = height * 0.06;
+  const jarY = height * 0.05;
   const jarH = height * 0.88;
 
-  // Neck / lid proportions
-  const lidH = jarH * 0.1;
-  const lidInset = jarW * 0.12;
-  const neckH = jarH * 0.06;
+  // Zone heights
+  const lidH      = jarH * 0.13;  // outer cap height
+  const neckH     = jarH * 0.09;  // throat
+  const shoulderH = jarH * 0.09;  // outward flare
+  const bodyH     = jarH * 0.55;  // main body
+  const baseH     = jarH * 0.14;  // rounded base zone
 
-  // Body coords
-  const bodyY = jarY + lidH + neckH;
-  const bodyH = jarH - lidH - neckH;
-  const bodyTopW = jarW - lidInset * 0.5;
-  const bodyBotW = jarW - lidInset * 0.15;
-  const bodyTopX = jarX + (jarW - bodyTopW) / 2;
-  const bodyBotX = jarX + (jarW - bodyBotW) / 2;
+  // Neck extents (narrower than body)
+  const neckInset = jarW * 0.16;
+  const neckX     = jarX + neckInset;
+  const neckW     = jarW - neckInset * 2;
 
-  // Lid rect coords
-  const lidX = jarX + lidInset;
-  const lidW = jarW - lidInset * 2;
+  // Body extents (full width)
+  const bodyX = jarX;
+  const bodyW = jarW;
 
-  // Neck transition points
-  const neckY = jarY + lidH;
-  const neckTopL = lidX;
-  const neckTopR = lidX + lidW;
-  const neckBotL = bodyTopX;
-  const neckBotR = bodyTopX + bodyTopW;
+  // Horizontal centre
+  const cx = jarX + jarW / 2;
 
-  // Body path (trapezoid-ish, slightly wider at bottom)
-  const bodyPath = [
-    `M ${neckBotL} ${bodyY}`,
-    `L ${neckBotR} ${bodyY}`,
-    `Q ${bodyBotX + bodyBotW + jarW * 0.03} ${bodyY + bodyH * 0.6} ${bodyBotX + bodyBotW} ${bodyY + bodyH}`,
-    `L ${bodyBotX} ${bodyY + bodyH}`,
-    `Q ${bodyBotX - jarW * 0.03} ${bodyY + bodyH * 0.6} ${neckBotL} ${bodyY}`,
+  // Key Y positions (top → down)
+  const lidTop     = jarY;
+  const lidBot     = jarY + lidH;
+  const neckTop    = lidBot;
+  const neckBot    = neckTop + neckH;
+  const shoulderBot = neckBot + shoulderH;
+  const bodyBot    = shoulderBot + bodyH;
+  const baseBot    = bodyBot + baseH;   // ≈ jarY + jarH
+
+  // ── Lid paths ──────────────────────────────────────────────────────────────
+  const lidR = 3;
+  const lidOuterPath = [
+    `M ${neckX + lidR},${lidTop}`,
+    `L ${neckX + neckW - lidR},${lidTop}`,
+    `Q ${neckX + neckW},${lidTop} ${neckX + neckW},${lidTop + lidR}`,
+    `L ${neckX + neckW},${lidBot}`,
+    `L ${neckX},${lidBot}`,
+    `L ${neckX},${lidTop + lidR}`,
+    `Q ${neckX},${lidTop} ${neckX + lidR},${lidTop}`,
     'Z',
   ].join(' ');
 
-  // Neck path
+  // Inner screw band: 80% wide, sits in lower ~58% of lid height
+  const bandInset = neckW * 0.10;
+  const bandX     = neckX + bandInset;
+  const bandW     = neckW - bandInset * 2;
+  const bandTop   = lidTop + lidH * 0.42;
+  const lidBandPath = [
+    `M ${bandX},${bandTop}`,
+    `L ${bandX + bandW},${bandTop}`,
+    `L ${bandX + bandW},${lidBot}`,
+    `L ${bandX},${lidBot}`,
+    'Z',
+  ].join(' ');
+
+  // Horizontal screw-band line on lid
+  const screwLine = `M ${neckX + 3},${lidTop + lidH * 0.55} L ${neckX + neckW - 3},${lidTop + lidH * 0.55}`;
+
+  // ── Neck path ─────────────────────────────────────────────────────────────
   const neckPath = [
-    `M ${neckTopL} ${neckY}`,
-    `L ${neckTopR} ${neckY}`,
-    `L ${neckBotR} ${bodyY}`,
-    `L ${neckBotL} ${bodyY}`,
+    `M ${neckX},${neckTop}`,
+    `L ${neckX + neckW},${neckTop}`,
+    `L ${neckX + neckW},${neckBot}`,
+    `L ${neckX},${neckBot}`,
     'Z',
   ].join(' ');
 
-  // Lid rect (rounded top, flat bottom)
-  const lidRadius = 3;
-  const lidPath = [
-    `M ${lidX + lidRadius} ${jarY}`,
-    `L ${lidX + lidW - lidRadius} ${jarY}`,
-    `Q ${lidX + lidW} ${jarY} ${lidX + lidW} ${jarY + lidRadius}`,
-    `L ${lidX + lidW} ${jarY + lidH}`,
-    `L ${lidX} ${jarY + lidH}`,
-    `L ${lidX} ${jarY + lidRadius}`,
-    `Q ${lidX} ${jarY} ${lidX + lidRadius} ${jarY}`,
+  // ── Outer body (shoulders + body + rounded base) ──────────────────────────
+  // Left side: Q curve from neck-bot-left to shoulder-bot-left (mason "hip")
+  // Base: Q arc through baseBot midpoint (rounded bottom)
+  // Right side: Q curve mirror
+  const outerBodyPath = [
+    `M ${neckX},${neckBot}`,
+    `Q ${bodyX},${neckBot} ${bodyX},${shoulderBot}`,
+    `L ${bodyX},${bodyBot}`,
+    `Q ${cx},${baseBot} ${bodyX + bodyW},${bodyBot}`,
+    `L ${bodyX + bodyW},${shoulderBot}`,
+    `Q ${bodyX + bodyW},${neckBot} ${neckX + neckW},${neckBot}`,
     'Z',
   ].join(' ');
 
-  // Rim highlight at top of body
-  const rimPath = `M ${neckBotL} ${bodyY} L ${neckBotR} ${bodyY}`;
+  // Inner body (glass thickness): same shape inset by ~4px
+  const ib = 4;
+  const innerBodyPath = [
+    `M ${neckX + ib},${neckBot}`,
+    `Q ${bodyX + ib},${neckBot} ${bodyX + ib},${shoulderBot}`,
+    `L ${bodyX + ib},${bodyBot - ib}`,
+    `Q ${cx},${baseBot - ib * 2} ${bodyX + bodyW - ib},${bodyBot - ib}`,
+    `L ${bodyX + bodyW - ib},${shoulderBot}`,
+    `Q ${bodyX + bodyW - ib},${neckBot} ${neckX + neckW - ib},${neckBot}`,
+    'Z',
+  ].join(' ');
 
-  // ClipPath interior bounds for notes (shrink from jar edges)
-  const clipPad = jarW * 0.06;
-  const clipX = bodyBotX + clipPad;
-  const clipW = bodyBotW - clipPad * 2;
-  const clipY = bodyY + jarH * 0.03;
-  const clipH = bodyH - jarH * 0.04;
+  // Glass rim highlight line (top of body zone)
+  const rimPath = `M ${neckX},${neckBot} L ${neckX + neckW},${neckBot}`;
 
-  // Note placement bounds
+  // Inner base shadow arc
+  const baseShadowPath = `M ${bodyX + bodyW * 0.15},${bodyBot + baseH * 0.6} Q ${cx},${baseBot - 2} ${bodyX + bodyW * 0.85},${bodyBot + baseH * 0.6}`;
+
+  // ── ClipPath for notes ────────────────────────────────────────────────────
+  const clipPad = jarW * 0.05;
+  const clipX   = bodyX + clipPad;
+  const clipW   = bodyW - clipPad * 2;
+  const clipY   = shoulderBot + jarH * 0.01;
+  const clipH   = bodyBot - clipY - jarH * 0.01;
+
   const noteBounds: JarBounds = {
-    x: clipX,
-    y: clipY,
-    width: clipW,
+    x:      clipX,
+    y:      clipY,
+    width:  clipW,
     height: clipH,
   };
 
-  // Cap and slice notes — show most recent on top (rendered last = on top in SVG)
+  const CLIP_ID = 'jarInteriorClip';
+
+  // ── Note management ───────────────────────────────────────────────────────
   const visibleNotes = useMemo(() => {
     if (notes.length <= MAX_NOTES) return notes;
-    // Keep the last MAX_NOTES (most recent)
     return notes.slice(notes.length - MAX_NOTES);
   }, [notes]);
 
   const totalNotes = notes.length;
 
-  // Compute placements — memoized, deterministic by note.id
   const placements = useMemo(
     () =>
       visibleNotes.map((note, idx) => ({
@@ -129,124 +175,155 @@ export function JarVisual({ notes, width, height, testID }: JarVisualProps) {
           idx,
         ),
       })),
-    // noteBounds is derived from width/height — include those as deps
+    // noteBounds derives from width/height — include those as deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [visibleNotes, totalNotes, width, height],
   );
 
-  const INK = '#2C231A';
-  const INK_MUTED = '#7A6E64';
-  const PAPER = '#EDE6D6';
-  const CLIP_ID = 'jarClip';
-  const SHADOW_LEFT_ID = 'shadowLeft';
-  const SHADOW_RIGHT_ID = 'shadowRight';
+  const NOTE_W = 36;
+  const NOTE_H = 26;
 
   return (
-    <Svg width={width} height={height} testID={testID}>
+    <Svg
+      width={width}
+      height={height}
+      testID={testID}
+      accessible={true}
+      accessibilityLabel={`Jar with ${notes.length} moments`}
+    >
       <Defs>
-        {/* Clip path for notes — keeps them inside the jar body */}
         <ClipPath id={CLIP_ID}>
           <Rect x={clipX} y={clipY} width={clipW} height={clipH} />
         </ClipPath>
-        {/* Left wall inner shadow */}
-        <LinearGradient id={SHADOW_LEFT_ID} x1="0" y1="0" x2="1" y2="0">
-          <Stop offset="0" stopColor={INK} stopOpacity="0.06" />
-          <Stop offset="0.3" stopColor={INK} stopOpacity="0" />
-        </LinearGradient>
-        {/* Right wall inner shadow */}
-        <LinearGradient id={SHADOW_RIGHT_ID} x1="1" y1="0" x2="0" y2="0">
-          <Stop offset="0" stopColor={INK} stopOpacity="0.06" />
-          <Stop offset="0.3" stopColor={INK} stopOpacity="0" />
-        </LinearGradient>
       </Defs>
 
-      {/* Jar body fill — translucent paper tone */}
+      {/* ── Base contact shadow (surface below jar) ──────────────────────── */}
+      <Ellipse
+        cx={cx}
+        cy={baseBot + 4}
+        rx={bodyW * 0.35}
+        ry={5}
+        fill={INK}
+        fillOpacity={0.06}
+      />
+
+      {/* ── Outer body fill — glass silhouette ───────────────────────────── */}
       <Path
-        d={bodyPath}
+        d={outerBodyPath}
         fill={PAPER}
-        fillOpacity={0.55}
+        fillOpacity={0.35}
         stroke="none"
       />
 
-      {/* Neck fill */}
+      {/* ── Inner body fill — deeper tint for glass thickness illusion ─────── */}
+      <Path
+        d={innerBodyPath}
+        fill={PAPER_DEEP}
+        fillOpacity={0.45}
+        stroke="none"
+      />
+
+      {/* ── Neck fill ────────────────────────────────────────────────────── */}
       <Path
         d={neckPath}
         fill={PAPER}
-        fillOpacity={0.55}
+        fillOpacity={0.40}
         stroke="none"
       />
 
-      {/* Folded notes inside — clipped to interior */}
+      {/* ── Folded notes — rendered before outline strokes ───────────────── */}
       <G clipPath={`url(#${CLIP_ID})`}>
         {placements.map(({ note, placement }) => (
           <FoldedNote
             key={note.id}
-            x={placement.x - 14} // center note (half of default width 28)
-            y={placement.y - 11} // center note (half of default height 22)
+            x={placement.x - NOTE_W / 2}
+            y={placement.y - NOTE_H / 2}
             rotation={placement.rotation}
             color={placement.color}
           />
         ))}
+
+        {/* Empty-state ghost note outline */}
+        {notes.length === 0 && (
+          <Path
+            d={[
+              `M ${clipX + clipW * 0.35},${clipY + clipH * 0.70}`,
+              `L ${clipX + clipW * 0.65},${clipY + clipH * 0.70}`,
+              `L ${clipX + clipW * 0.65},${clipY + clipH * 0.88}`,
+              `L ${clipX + clipW * 0.35},${clipY + clipH * 0.88}`,
+              'Z',
+            ].join(' ')}
+            fill="none"
+            stroke={INK}
+            strokeOpacity={0.15}
+            strokeWidth={1}
+          />
+        )}
       </G>
 
-      {/* Left inner shadow overlay */}
+      {/* ── Inner base shadow arc ─────────────────────────────────────────── */}
       <Path
-        d={bodyPath}
-        fill={`url(#${SHADOW_LEFT_ID})`}
-        stroke="none"
-      />
-      {/* Right inner shadow overlay */}
-      <Path
-        d={bodyPath}
-        fill={`url(#${SHADOW_RIGHT_ID})`}
-        stroke="none"
-      />
-
-      {/* Jar body outline stroke */}
-      <Path
-        d={bodyPath}
+        d={baseShadowPath}
         fill="none"
         stroke={INK}
-        strokeOpacity={0.7}
-        strokeWidth={1.2}
+        strokeOpacity={0.08}
+        strokeWidth={4}
       />
 
-      {/* Neck outline */}
+      {/* ── Body outline stroke ───────────────────────────────────────────── */}
+      <Path
+        d={outerBodyPath}
+        fill="none"
+        stroke={INK}
+        strokeOpacity={0.85}
+        strokeWidth={1.5}
+      />
+
+      {/* ── Neck outline ─────────────────────────────────────────────────── */}
       <Path
         d={neckPath}
         fill="none"
         stroke={INK}
-        strokeOpacity={0.7}
-        strokeWidth={1.2}
+        strokeOpacity={0.85}
+        strokeWidth={1.5}
       />
 
-      {/* Lid */}
-      <Path
-        d={lidPath}
-        fill={PAPER}
-        fillOpacity={0.7}
-        stroke={INK}
-        strokeOpacity={0.7}
-        strokeWidth={1.2}
-      />
-
-      {/* Rim highlight line at top of body */}
+      {/* ── Glass rim highlight ───────────────────────────────────────────── */}
       <Path
         d={rimPath}
         fill="none"
-        stroke="#FFFFFF"
-        strokeOpacity={0.35}
-        strokeWidth={1}
+        stroke="#F5F0E8"
+        strokeOpacity={0.40}
+        strokeWidth={1.2}
       />
 
-      {/* Subtle label band on lid */}
+      {/* ── Lid outer cap ────────────────────────────────────────────────── */}
       <Path
-        d={`M ${lidX + 4} ${jarY + lidH * 0.45} L ${lidX + lidW - 4} ${jarY + lidH * 0.45}`}
+        d={lidOuterPath}
+        fill={PAPER}
+        fillOpacity={0.72}
+        stroke={INK}
+        strokeOpacity={0.85}
+        strokeWidth={1.8}
+      />
+
+      {/* ── Lid inner screw band ─────────────────────────────────────────── */}
+      <Path
+        d={lidBandPath}
+        fill={PAPER_ALT}
+        fillOpacity={0.80}
+        stroke={INK}
+        strokeOpacity={0.60}
+        strokeWidth={0.9}
+      />
+
+      {/* ── Screw-band line ───────────────────────────────────────────────── */}
+      <Path
+        d={screwLine}
         fill="none"
-        stroke={INK_MUTED}
-        strokeOpacity={0.2}
-        strokeWidth={0.5}
-        strokeDasharray="2,3"
+        stroke={INK}
+        strokeOpacity={0.15}
+        strokeWidth={0.8}
       />
     </Svg>
   );

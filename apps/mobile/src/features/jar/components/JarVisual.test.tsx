@@ -34,6 +34,9 @@ jest.mock('react-native-svg', () => {
   function RadialGradient({ children }: any) {
     return React.createElement(View, {}, children);
   }
+  function Ellipse({ testID, ...props }: any) {
+    return React.createElement(View, { testID });
+  }
   return {
     __esModule: true,
     default: Svg,
@@ -46,6 +49,7 @@ jest.mock('react-native-svg', () => {
     Stop,
     ClipPath,
     RadialGradient,
+    Ellipse,
   };
 });
 
