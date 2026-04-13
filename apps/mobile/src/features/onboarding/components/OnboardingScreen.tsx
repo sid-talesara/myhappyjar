@@ -174,11 +174,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   skipButton: {
+    // Top-right corner, outside flex flow
     position: 'absolute',
-    top: 16,
+    top: 12,
     right: 0,
     zIndex: 10,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 4,
     minWidth: 44,
     minHeight: 44,
@@ -190,7 +191,7 @@ const styles = StyleSheet.create({
     flex: 55,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 40,
+    paddingTop: 52,
   },
   visualRow: {
     flexDirection: 'row',
@@ -201,21 +202,23 @@ const styles = StyleSheet.create({
   copyArea: {
     flex: 45,
     justifyContent: 'flex-end',
-    paddingBottom: 24,
-    gap: 12,
+    paddingBottom: 32,
+    gap: 14,
   },
   title: {
-    lineHeight: 38,
+    // display token: Lora 500 30pt. 40 lineHeight for breathing room.
+    lineHeight: 40,
   },
   body: {
-    lineHeight: 24,
+    // DM Sans 400 16pt. Generous line-height for onboarding readability.
+    lineHeight: 26,
+    fontSize: 16,
   },
   paginationRow: {
-    // Sits just above CTA, unobtrusive
-    marginVertical: 4,
+    marginBottom: 2,
   },
   ctaButton: {
-    minHeight: 48,
-    marginTop: 4,
+    // Button lg = 52px height. borderRadius 12 per design spec.
+    borderRadius: 12,
   },
 });

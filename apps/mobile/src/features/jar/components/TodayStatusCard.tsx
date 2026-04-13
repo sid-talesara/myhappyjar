@@ -109,29 +109,30 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: 20,
     borderRadius: 12,
-    padding: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     // Subtle ink shadow per spec: blur <= 8px
     shadowColor: '#2C231A',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.07,
     shadowRadius: 6,
     elevation: 2,
   },
   cardEmpty: {
     backgroundColor: '#EDE6D6',
     borderWidth: 1,
-    borderColor: '#E2D5BF',
+    borderColor: '#D4C8AF',
     borderStyle: 'dashed',
   },
   cardFilled: {
     backgroundColor: '#EDE6D6',
     borderWidth: 1,
-    borderColor: '#E2D5BF',
+    borderColor: '#D4C8AF',
   },
   cardLocked: {
     backgroundColor: '#E2D5BF',
     borderWidth: 1,
-    borderColor: '#D4C8AF',
+    borderColor: '#C8BC9F',
     opacity: 0.7,
   },
   cardInner: {
@@ -142,19 +143,25 @@ const styles = StyleSheet.create({
   },
   textBlock: {
     flex: 1,
-    gap: 3,
+    gap: 4,
   },
   cardTitle: {
+    // DM Sans 500 17pt — between caption and title token; feels right for a compact card label
+    fontFamily: 'DM Sans',
+    fontWeight: '500',
+    fontSize: 17,
     color: '#2C231A',
-    fontSize: 16,
+    lineHeight: 22,
   },
   cardSubtitle: {
     color: '#7A6E64',
+    fontSize: 13,
+    lineHeight: 18,
   },
   excerpt: {
     color: '#2C231A',
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   iconWrap: {
     width: 44,

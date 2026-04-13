@@ -124,9 +124,9 @@ function DotCell({ isCurrentMonth, hasNote, isToday, noteColor, colors }: DotCel
   // Padding days (prev/next month): same dot but 30% opacity
   const outerOpacity = isCurrentMonth ? 1 : 0.3;
 
-  // Today ring: 12px container to accommodate 1.5px ring with padding
-  // Note/empty dots: 10px
-  const dotSize = isToday ? 12 : 10;
+  // Today ring: 14px container to accommodate 1.5px ring with padding
+  // Note/empty dots: 11px — slightly larger than prev 10px for better legibility
+  const dotSize = isToday ? 14 : 11;
   const borderRadius = dotSize / 2;
 
   return (
@@ -170,7 +170,7 @@ function DotCell({ isCurrentMonth, hasNote, isToday, noteColor, colors }: DotCel
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
   },
   headerRow: {
     flexDirection: 'row',

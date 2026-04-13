@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Tabs } from 'expo-router';
 import { useTheme } from '@myhappyjar/ui';
 import {
@@ -17,10 +17,6 @@ import {
 export default function TabsLayout() {
   const theme = useTheme();
 
-  useEffect(() => {
-    console.log('[TabsLayout] mounted');
-  }, []);
-
   return (
     <Tabs
       screenOptions={{
@@ -33,11 +29,15 @@ export default function TabsLayout() {
           borderTopColor: theme.colors.paperAlt,
           elevation: 0,
           shadowOpacity: 0,
+          height: 56,
+          paddingBottom: 8,
+          paddingTop: 6,
         },
         tabBarLabelStyle: {
           fontFamily: theme.fontFamilies.sans,
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '400',
+          letterSpacing: 0.2,
         },
       }}
     >

@@ -391,9 +391,10 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontFamily: 'DMSans_400Regular',
-    fontSize: 12,
+    fontSize: 11,
     color: '#7A6E64', // inkMuted
-    letterSpacing: 1,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
   },
   emojiTagsRow: {
     flexDirection: 'row',

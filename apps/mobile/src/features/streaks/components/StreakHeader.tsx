@@ -97,19 +97,23 @@ const styles = StyleSheet.create({
     fontSize: 72,
     fontWeight: '400',
     fontStyle: 'italic',
-    lineHeight: 80,
+    // lineHeight set to font size so baseline aligns precisely with unitText
+    lineHeight: 72,
     letterSpacing: -2,
   },
   unitText: {
     fontFamily: 'Lora',
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '400',
     fontStyle: 'italic',
-    lineHeight: 80,
-    marginBottom: 4,
+    lineHeight: 72,
+    // slight lift from baseline to optically align with number bottom
+    marginBottom: 2,
+    letterSpacing: -0.5,
   },
   subCaption: {
     fontSize: 13,
-    marginTop: 2,
+    marginTop: 6,
+    lineHeight: 18,
   },
 });

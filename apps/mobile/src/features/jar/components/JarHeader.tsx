@@ -31,17 +31,22 @@ export function JarHeader({ year, noteCount }: JarHeaderProps) {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingTop: 8,
-    paddingBottom: 4,
-    gap: 2,
+    paddingTop: 12,
+    paddingBottom: 6,
+    paddingHorizontal: 20,
+    gap: 3,
   },
   wordmark: {
-    fontSize: 18,
-    letterSpacing: 0.2,
+    // Lora 22pt — wordmark scale: larger than caption, smaller than display.
+    // Design intent: readable but recedes behind the jar. 22pt balances both.
+    fontSize: 22,
+    fontWeight: '500',
+    letterSpacing: 0.3,
     color: '#2C231A',
   },
   counter: {
     color: '#7A6E64',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
+    fontSize: 12,
   },
 });

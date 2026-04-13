@@ -23,11 +23,9 @@ export function JarScreen() {
   const { width, height } = useWindowDimensions();
   const { jar, notes, todayNote, isLoading } = useJarScreen();
 
-  console.log('[JarScreen] render', { notes: notes.length, jar: jar?.id, isLoading });
-
-  // Jar occupies ~55% of screen height, leaving room for header + card + tab bar
-  // Tab bar ~49px, card ~90px, header ~60px, paddings ~30px
-  const jarHeight = Math.max(height * 0.52, 280);
+  // Jar occupies ~55% of screen height per design spec — dominant visual element.
+  // Tab bar ~49px, card ~96px, header ~68px, paddings ~30px
+  const jarHeight = Math.max(height * 0.55, 300);
   const jarWidth = width;
 
   // Don't gate on isLoading — jar renders with whatever state is available.
@@ -71,7 +69,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    paddingBottom: 8,
+    paddingBottom: 12,
   },
   jarContainer: {
     flex: 1,

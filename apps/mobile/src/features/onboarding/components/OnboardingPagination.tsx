@@ -13,7 +13,7 @@ interface OnboardingPaginationProps {
 
 /**
  * Unobtrusive pagination — 6px dots, 8px gap.
- * Active: filled terracotta. Inactive: 20% opacity muted ink.
+ * Active: filled terracotta pill (16×6). Inactive: 6×6 circle at 20% opacity muted ink.
  */
 export function OnboardingPagination({ total, current }: OnboardingPaginationProps) {
   return (
@@ -39,18 +39,23 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   dot: {
+    // Base: 6×6 circle
     width: 6,
     height: 6,
     borderRadius: 3,
   },
   dotActive: {
+    // Active: pill — wider to indicate current position
+    width: 18,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: COLORS.accentWarm,
   },
   dotInactive: {
     backgroundColor: COLORS.inkMuted,
-    opacity: 0.2,
+    opacity: 0.25,
   },
 });

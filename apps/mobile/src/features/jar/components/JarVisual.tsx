@@ -275,8 +275,8 @@ export function JarVisual({ notes, width, height, testID }: JarVisualProps) {
         d={outerBodyPath}
         fill="none"
         stroke={INK}
-        strokeOpacity={0.85}
-        strokeWidth={1.5}
+        strokeOpacity={0.90}
+        strokeWidth={1.8}
       />
 
       {/* ── Neck outline ─────────────────────────────────────────────────── */}
@@ -284,8 +284,8 @@ export function JarVisual({ notes, width, height, testID }: JarVisualProps) {
         d={neckPath}
         fill="none"
         stroke={INK}
-        strokeOpacity={0.85}
-        strokeWidth={1.5}
+        strokeOpacity={0.90}
+        strokeWidth={1.8}
       />
 
       {/* ── Glass rim highlight ───────────────────────────────────────────── */}

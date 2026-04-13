@@ -130,12 +130,14 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   divider: {
-    height: StyleSheet.hairlineWidth,
+    // 1px instead of hairlineWidth for greater visibility on warm bg
+    height: 1,
     marginHorizontal: 24,
-    marginVertical: 4,
+    marginTop: 8,
+    marginBottom: 4,
   },
   section: {
-    marginTop: 32,
+    marginTop: 28,
   },
   caveRow: {
     alignItems: 'center',
