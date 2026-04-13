@@ -24,6 +24,8 @@ interface DbProviderProps {
 export function DbProvider({ children }: DbProviderProps) {
   const [db, setDb] = useState<DatabaseClient | null>(null);
 
+  console.log('[DbProvider]', db ? 'ready' : 'loading');
+
   useEffect(() => {
     openAndMigrate().then(setDb).catch(console.error);
   }, []);

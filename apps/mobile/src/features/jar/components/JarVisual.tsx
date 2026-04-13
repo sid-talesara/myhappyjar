@@ -27,6 +27,7 @@ interface JarVisualProps {
  * Capped at 150 nodes regardless of note count.
  */
 export function JarVisual({ notes, width, height, testID }: JarVisualProps) {
+  console.log('[JarVisual] render', { width, height, notes: notes.length });
   // Dimensions
   const jarX = width * 0.08;
   const jarW = width * 0.84;
